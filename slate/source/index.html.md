@@ -88,7 +88,7 @@ type `git --version` in the terminal to make sure it is properly installed when 
 ```shell
 sudo apt-get update
 sudo apt-get install python-software-properties
-sudo add-apt-repository ppa:ondrej/php5-5.6
+sudo LC_ALL=C.UTF-8 add-apt-repository ppa:ondrej/php
 sudo apt-get update
 ```
 
@@ -282,7 +282,7 @@ sudo ln -s /etc/nginx/sites-available/{mydomainorIP} /etc/nginx/sites-enabled/{m
 > Restart server
 
 ```shell
-sudo /etc/init.d/nginx retart
+sudo /etc/init.d/nginx restart
 ```
 
 
@@ -325,3 +325,54 @@ sudo service php5-fpm reload
 sudo service nginx reload
 
 ```
+
+
+#PhpMyAdmin Installation
+
+To install phpmyadmin, follow these steps:
+
+```shell
+sudo apt-get install phpmyadmin
+#it will ask you which websever you would like to configure
+#since nginx is not listed just press TAB
+#the next prompt about dbconfig-common press YES
+sudo ln -s /usr/share/phpmyadmin /usr/share/nginx/html
+sudo php5enmod mcrypt
+sudo service php5-fpm restart
+```
+
+Last step, open the default file in in sites-available and paste the following, 
+then recreate the symlink in sites enabled
+
+> default file in sites-available
+
+```shell
+location /phpmyadmin {
+    root /usr/share/;
+    index index.php;
+
+    location ~ ^/phpmyadmin/(.+\.php)$ {
+            try_files $uri =404;
+            root /usr/share/;
+            fastcgi_pass unix:/var/run/php5-fpm.sock;
+            fastcgi_index index.php;
+            fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+            include fastcgi_params;
+    }
+
+    location ~* ^/phpmyadmin/(.+\.(jpg|jpeg|gif|css|png|js|ico|html|xml|txt))$ {
+            root /usr/share;
+    }
+}
+
+location /phpMyAdmin
+{
+    rewrite ^/* /phpmyadmin last;
+}
+```
+
+Go to `http://server_domain_or_IP/phpmyadmin`
+
+
+
+
