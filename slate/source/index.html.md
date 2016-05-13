@@ -17,16 +17,57 @@ search: true
 
 In this guide, we will discuss how to install Laravel on Ubuntu 14.04. We will be using Nginx as our web server and will be working with the most recent version of Laravel at the time of this writing, version 5.2.
 
+#Create Droplet
 
-# Authentication
-
-> To authenticate via ssh, use this code:
+<b><u>After you create your droplet</b></u>, you need to create an <b>ssh key</b> for the <b>root user</b>, to avoid brute force attacks and password guessing.
 
 ```shell
-ssh user@ip
-
+#on your local machine
+ssh-keygen -t rsa 
+#usually located in /Users/Elie/.ssh/ and named 'id_rsa' , press enter to keep location
+#you will be prompted for a ssh key password, always remember it (lynn662625)
 ```
-replace the user and ip upon the configuration.
+
+Then you need to copy the public key <b>id_rsa.pub</b> and add it to your server authorized keys.
+
+```shell
+sudo vi /Users/Elie/.ssh/id_rsa.pub
+#copy all the code generated
+#go to your server and authenticate (you will be prompted to change your root password first time)
+cd ~
+cd .ssh/
+vi authorized_keys
+#paste the key of id_rsa.pub
+```
+
+After you ensured login with the rsa key, we need to <b>remove the root password</b> and 
+restrict the root login to only be permitted via SSH keys.
+
+```shell
+sudo vi /etc/ssh/sshd_config
+#change PermitRootLogin value to without-password
+PermitRootLogin without-password
+reload ssh
+```
+
+#Adding user on server
+It's not recommended to work with the root user on server, so let's create a new user and give it sudo persmissions.
+
+```shell
+adduser elie
+#you will be prompted for a password
+adduser elie sudo #add it to the sudo group
+```
+
+If you need to also enable the rsa key login for the created user. 
+
+```shell
+cd ~
+mkdir .ssh
+sudo vi .ssh/authorized_keys
+
+#add your id_rsa.pub key
+```
 
 # Install GIT
 
